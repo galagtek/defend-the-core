@@ -146,11 +146,10 @@ story.append(Paragraph(
     "Sur NixOS, la situation est fondamentalement différente. Les fichiers de "
     "configuration système ne sont pas édités directement : ils sont générés depuis "
     "<font name='CodeFont'>configuration.nix</font> à chaque déploiement et placés dans "
-    "le <b>Nix store</b> en lecture seule (<font name='CodeFont'>/nix/store</font>, "
-    "monté en <font name='CodeFont'>readOnly</font>). Toute modification manuelle d'un "
-    "fichier géré par NixOS est <b>écrasée</b> au prochain "
-    "<font name='CodeFont'>nixos-rebuild switch</font>. Le Nix store étant immuable, "
-    "il est impossible d'y remplacer un binaire en place.",
+    "le <b>Nix store</b> en lecture seule (<font name='CodeFont'>/nix/store</font>). "
+    "Toute modification manuelle d'un fichier géré par NixOS est <b>écrasée</b> au "
+    "prochain <font name='CodeFont'>nixos-rebuild switch</font>, et le Nix store étant "
+    "immuable, impossible d'y remplacer un binaire en place.",
     styles['body']
 ))
 story.append(Paragraph(
@@ -336,20 +335,20 @@ story.append(Paragraph(
     styles['caption']
 ))
 story.append(Paragraph(
-    "La directive <font name='CodeFont'>PermitRootLogin = \"no\"</font> supprime la "
-    "possibilité même d'une connexion root directe — l'administrateur se connecte en "
-    "compte non privilégié, puis élève via <font name='CodeFont'>sudo</font> (journalisé). "
-    "<font name='CodeFont'>PasswordAuthentication = false</font> neutralise entièrement "
-    "le bruteforce de mots de passe, et <font name='CodeFont'>MaxAuthTries = 3</font> "
-    "limite le nombre de tentatives par session avant déconnexion.",
+    "La directive <font name='CodeFont'>PermitRootLogin = \"no\"</font> supprime toute "
+    "connexion root directe — l'administrateur se connecte en compte non privilégié puis "
+    "élève via <font name='CodeFont'>sudo</font> (journalisé). "
+    "<font name='CodeFont'>PasswordAuthentication = false</font> neutralise le bruteforce "
+    "de mots de passe, et <font name='CodeFont'>MaxAuthTries = 3</font> limite les "
+    "tentatives par session.",
     styles['body']
 ))
 
 story.append(Paragraph(
-    "<b>Bannière légale.</b> Un fichier <font name='CodeFont'>/etc/ssh/banner</font> "
-    "affiche un avertissement : « Accès réservé à l'administration autorisée. Toute "
-    "connexion est journalisée et surveillée. » Outre l'effet dissuasif, cette bannière "
-    "est requise pour la recevabilité juridique des journaux en cas de poursuite.",
+    "<b>Bannière légale.</b> <font name='CodeFont'>/etc/ssh/banner</font> affiche un "
+    "avertissement (« Accès réservé à l'administration autorisée. Toute connexion est "
+    "journalisée. »). Outre l'effet dissuasif, elle est requise pour la recevabilité "
+    "juridique des journaux en cas de poursuite.",
     styles['body']
 ))
 
@@ -485,11 +484,11 @@ story.append(Paragraph(
 ))
 story.append(Paragraph(
     "La combinaison <font name='CodeFont'>readOnlyNixStore</font> + "
-    "<font name='CodeFont'>tmpOnTmpfs</font> crée une propriété forte : un attaquant "
-    "qui réussirait à déposer un binaire malveillant dans <font name='CodeFont'>/tmp</font> "
-    "le verrait disparaître au prochain redémarrage, et ne pourrait pas le recopier dans "
-    "le Nix store (lecture seule). La configuration étant versionnée Git, toute "
-    "modification légitime passe par un commit auditable et une revue de pull request.",
+    "<font name='CodeFont'>tmpOnTmpfs</font> crée une propriété forte : un binaire "
+    "malveillant déposé dans <font name='CodeFont'>/tmp</font> disparaît au redémarrage "
+    "et ne peut être recopié dans le Nix store (lecture seule). La configuration étant "
+    "versionnée Git, toute modification légitime passe par un commit auditable et une "
+    "revue de pull request.",
     styles['body']
 ))
 
@@ -522,11 +521,9 @@ story.append(Paragraph(
 ))
 story.append(Paragraph(
     "Toute écriture (<font name='CodeFont'>-p w</font>) ou modification d'attribut "
-    "(<font name='CodeFont'>-p a</font>) sur <font name='CodeFont'>/etc/nixos</font>, "
-    "<font name='CodeFont'>/etc/sudoers</font> ou <font name='CodeFont'>/etc/passwd</font> "
-    "génère un événement horodaté et taggé. Wazuh corrèle ces événements avec les "
-    "connexions SSH pour détecter, par exemple, une modification de configuration juste "
-    "après une connexion inhabituelle.",
+    "(<font name='CodeFont'>-p a</font>) sur ces fichiers génère un événement horodaté "
+    "et taggé. Wazuh corrèle ces événements avec les connexions SSH pour détecter, par "
+    "exemple, une modification de configuration juste après une connexion inhabituelle.",
     styles['body']
 ))
 
@@ -589,9 +586,8 @@ story.append(Paragraph(
 ))
 story.append(Paragraph(
     "La <b>synchronisation NTP</b> est essentielle : sans horloges cohérentes, les "
-    "événements remontés par auditd, SSH et fail2ban ne peuvent être corrélés "
-    "correctement dans Wazuh. Une dérive d'horloge de quelques secondes suffit à "
-    "masquer la séquence réelle d'une attaque.",
+    "événements d'auditd, SSH et fail2ban ne peuvent être corrélés dans Wazuh. Une dérive "
+    "de quelques secondes suffit à masquer la séquence réelle d'une attaque.",
     styles['body']
 ))
 
@@ -621,9 +617,9 @@ story.append(Paragraph(
 ))
 story.append(Paragraph(
     "Le forward en TCP (et non UDP) garantit la délivrance : en cas d'indisponibilité "
-    "temporaire de Wazuh, rsyslog bufferise et retransmet. Wazuh corrèle alors les "
-    "événements du bastion avec ceux des autres hôtes (OPNsense, serveurs du VLAN 30) "
-    "pour reconstituer la chronologie complète d'une session d'administration.",
+    "temporaire de Wazuh, rsyslog bufferise et retransmet. Wazuh corrèle les événements "
+    "du bastion avec ceux des autres hôtes (OPNsense, serveurs du VLAN 30) pour "
+    "reconstituer la chronologie complète d'une session d'administration.",
     styles['body']
 ))
 
@@ -660,12 +656,12 @@ story.append(Paragraph(
 
 story.append(add_heading("5.1. Résistance au phishing et à l'exfiltration", styles, 1))
 story.append(Paragraph(
-    "Contrairement à une clé logicielle classique (fichier <font name='CodeFont'>"
-    "id_ed25519</font>), une clé FIDO2 ne peut pas être <b>clonée</b> ni <b>copiée</b> "
-    "à distance : la partie privée ne quitte jamais le token. Même si le poste "
-    "administrateur est entièrement compromis par un malware, l'attaquant ne peut pas "
-    "voler la clé — il peut au pire <i>utiliser</i> le token pendant qu'il est "
-    "physiquement inséré, ce qui suppose déjà un compromis runtime actif.",
+    "Contrairement à une clé logicielle classique (fichier "
+    "<font name='CodeFont'>id_ed25519</font>), une clé FIDO2 ne peut pas être "
+    "<b>clonée</b> ni <b>copiée</b> à distance : la partie privée ne quitte jamais le "
+    "token. Même si le poste admin est entièrement compromis par un malware, "
+    "l'attaquant ne peut pas voler la clé — il peut au pire <i>utiliser</i> le token "
+    "pendant qu'il est physiquement inséré.",
     styles['body']
 ))
 fido_data = [

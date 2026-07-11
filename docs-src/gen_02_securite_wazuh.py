@@ -7,6 +7,8 @@ active response (blocage automatique via API OPNsense), SCA, dashboards,
 choix Wazuh vs alternatives.
 """
 import sys, os
+from xml.sax.saxutils import escape as _xml_escape
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pdf_common import *
 from reportlab.platypus import Paragraph, Spacer, PageBreak, Table, TableStyle, HRFlowable
@@ -20,6 +22,13 @@ OUTPUT = os.path.join(os.path.dirname(__file__), '..', 'docs', '02_securite_wazu
 
 doc = build_doc(OUTPUT, "Defend-The-Core — Sécurité & Wazuh")
 story = []
+
+
+def code_para(text):
+    """Prépare un bloc de code pour le style 'code' :
+    échappe les caractères XML (&, <, >) puis convertit les sauts de ligne."""
+    return Paragraph(_xml_escape(text).replace('\n', '<br/>'), styles['code'])
+
 
 # ============================================================
 # PAGE DE TITRE
@@ -159,7 +168,7 @@ diagram = (
     "                                                   v\n"
     "                                              Dashboard (443) : alertes, SCA"
 )
-story.append(Paragraph(diagram.replace('&', '&').replace('<', '<').replace('>', '>').replace('\n', '<br/>'), styles['code']))
+story.append(code_para(diagram))
 story.append(Paragraph(
     "Figure 1 — Flux : logs de toutes les VMs → Wazuh (514/1514) → corrélation → "
     "alertes → active response → API OPNsense → alias dynamique → blocage.",
@@ -206,8 +215,8 @@ install_code = (
     "# 1. Ajout du dépôt apt officiel Wazuh\n"
     "curl -sO https://packages.wazuh.com/key/GPG-KEY-WAZUH\n"
     "gpg --dearmor -o /usr/share/keyrings/wazuh.gpg GPG-KEY-WAZUH\n"
-    "echo \"deb [signed-by=/usr/share/keyrings/wazuh.gpg] \\\n"
-    "  https://packages.wazuh.com/4.x/apt stable main\" \\\n"
+    'echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] \\\n'
+    '  https://packages.wazuh.com/4.x/apt stable main" \\\n'
     "  > /etc/apt/sources.list.d/wazuh.list\n"
     "apt-get update\n"
     "\n"
@@ -220,7 +229,7 @@ install_code = (
     "\n"
     "systemctl enable --now wazuh-manager wazuh-indexer wazuh-dashboard"
 )
-story.append(Paragraph(install_code.replace('&', '&').replace('<', '<').replace('>', '>').replace('\n', '<br/>'), styles['code']))
+story.append(code_para(install_code))
 
 story.append(add_heading("3.3. Activation du syslog entrant pour OPNsense", styles, 1))
 story.append(Paragraph(
@@ -240,7 +249,7 @@ syslog_code = (
     "  <local_ip>10.10.99.10</local_ip>\n"
     "</remote>"
 )
-story.append(Paragraph(syslog_code.replace('\n', '<br/>'), styles['code']))
+story.append(code_para(syslog_code))
 story.append(Paragraph(
     "Côté OPNsense, une règle d'export syslog (Interface > Logs > Settings) "
     "enverra les événements de firewall, IDS et auth vers 10.10.99.10:514.",
@@ -285,44 +294,44 @@ story.append(Paragraph(
 linux_code = (
     "#!/usr/bin/env bash\n"
     "# deploy-agent-linux.sh — installe l'agent Wazuh sur Linux\n"
-    "MANAGER_IP=\"10.10.99.10\"\n"
-    "GROUP=\"${1:-linux}\"\n"
+    'MANAGER_IP="10.10.99.10"\n'
+    'GROUP="${1:-linux}"\n'
     "\n"
     "if grep -qi nixos /etc/os-release; then\n"
     "  # NixOS : configuration déclarative (immuable)\n"
     "  echo 'services.wazuh-agent.enable = true;' >> /etc/nixos/wazuh.nix\n"
-    "  echo 'services.wazuh-agent.settings.client.address = \"'\"$MANAGER_IP\"'\";' \\\n"
+    '  echo \'services.wazuh-agent.settings.client.address = "\'$MANAGER_IP\'";\' \\\n'
     "    >> /etc/nixos/wazuh.nix\n"
     "  nixos-rebuild switch\n"
     "elif grep -qi debian /etc/os-release; then\n"
     "  curl -so wazuh-agent.deb https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.7.0-1_amd64.deb\n"
-    "  WAZUH_MANAGER=\"$MANAGER_IP\" WAZUH_GROUP=\"$GROUP\" dpkg -i wazuh-agent.deb\n"
+    '  WAZUH_MANAGER="$MANAGER_IP" WAZUH_GROUP="$GROUP" dpkg -i wazuh-agent.deb\n'
     "  systemctl enable --now wazuh-agent\n"
     "else  # famille RPM (RHEL/Fedora/CentOS)\n"
     "  rpm -i https://packages.wazuh.com/4.x/yum/wazuh-agent-4.7.0-1.x86_64.rpm\n"
-    "  sed -i \"s/MANAGER_IP/$MANAGER_IP/\" /var/ossec/etc/ossec.conf\n"
+    '  sed -i "s/MANAGER_IP/$MANAGER_IP/" /var/ossec/etc/ossec.conf\n'
     "  systemctl enable --now wazuh-agent\n"
     "fi"
 )
-story.append(Paragraph(linux_code.replace('&', '&').replace('<', '<').replace('>', '>').replace('\n', '<br/>'), styles['code']))
+story.append(code_para(linux_code))
 
 story.append(add_heading("4.2. Script Windows (PowerShell)", styles, 1))
 win_code = (
     "# deploy-agent-windows.ps1 — agent Wazuh sur Windows\n"
-    "$ManagerIP = \"10.10.99.10\"\n"
+    '$ManagerIP = "10.10.99.10"\n'
     "$Group     = if ($args[0]) { $args[0] } else { \"windows\" }\n"
     "\n"
-    "Invoke-WebRequest -Uri \"https://packages.wazuh.com/4.x/windows/wazuh-agent-4.7.0-1.msi\" `\n"
-    "  -OutFile \"$env:TEMP\\wazuh-agent.msi\"\n"
+    'Invoke-WebRequest -Uri "https://packages.wazuh.com/4.x/windows/wazuh-agent-4.7.0-1.msi" `\n'
+    '  -OutFile "$env:TEMP\\wazuh-agent.msi"\n'
     "\n"
-    "msiexec /i \"$env:TEMP\\wazuh-agent.msi\" `\n"
-    "  /q WAZUH_MANAGER=\"$ManagerIP\" WAZUH_REGISTRATION_SERVER=\"$ManagerIP\" `\n"
-    "  WAZUH_AGENT_GROUP=\"$Group\"\n"
+    'msiexec /i "$env:TEMP\\wazuh-agent.msi" `\n'
+    '  /q WAZUH_MANAGER="$ManagerIP" WAZUH_REGISTRATION_SERVER="$ManagerIP" `\n'
+    '  WAZUH_AGENT_GROUP="$Group"\n'
     "\n"
     "Start-Service WazuhSvc\n"
     "Set-Service WazuhSvc -StartupType Automatic"
 )
-story.append(Paragraph(win_code.replace('&', '&').replace('<', '<').replace('>', '>').replace('\n', '<br/>'), styles['code']))
+story.append(code_para(win_code))
 
 story.append(add_heading("4.3. Groupes d'agents", styles, 1))
 story.append(Paragraph(
@@ -382,8 +391,8 @@ story.append(Paragraph(
 ))
 rule_xml = (
     "<!-- local_rules.xml : bruteforce SSH abouti -->\n"
-    "<group name=\"local,sshd,\">\n"
-    "  <rule id=\"100100\" level=\"10\">\n"
+    '<group name="local,sshd,">\n'
+    '  <rule id="100100" level="10">\n'
     "    <if_matched_sid>5712</if_matched_sid>\n"
     "    <if_matched_group>authentication_success</if_matched_group>\n"
     "    <same_source_ip />\n"
@@ -395,7 +404,7 @@ rule_xml = (
     "  </rule>\n"
     "</group>"
 )
-story.append(Paragraph(rule_xml.replace('\n', '<br/>'), styles['code']))
+story.append(code_para(rule_xml))
 story.append(Paragraph(
     "Le niveau 10 (> 7) déclenche automatiquement l'active response (voir "
     "section 6) : l'IP source est poussée dans l'alias OPNsense et bloquée sans "
@@ -476,7 +485,7 @@ ar_code = (
     "  <white_list>10.10.99.1</white_list>    <!-- OPNsense -->\n"
     "</global>"
 )
-story.append(Paragraph(ar_code.replace('\n', '<br/>'), styles['code']))
+story.append(code_para(ar_code))
 
 story.append(add_heading("6.4. Script block-attacker.sh", styles, 1))
 story.append(Paragraph(
@@ -488,31 +497,31 @@ story.append(Paragraph(
 block_code = (
     "#!/usr/bin/env bash\n"
     "# block-attacker.sh — active response Wazuh -> OPNsense API\n"
-    "OPNSENSE_API=\"https://10.10.99.1/api\"\n"
-    "API_KEY=\"${OPN_API_KEY}\"      # secret, hors du dépôt\n"
-    "API_SECRET=\"${OPN_API_SECRET}\"\n"
-    "ALIAS=\"wazuh_blocked_ips\"\n"
+    'OPNSENSE_API="https://10.10.99.1/api"\n'
+    'API_KEY="${OPN_API_KEY}"      # secret, hors du dépôt\n'
+    'API_SECRET="${OPN_API_SECRET}"\n'
+    'ALIAS="wazuh_blocked_ips"\n'
     "\n"
-    "ACTION=\"$1\"           # add | delete\n"
-    "SRCIP=\"${ALERTSRCIP:-}\"\n"
-    "[ -z \"$SRCIP\" ] && exit 0\n"
+    'ACTION="$1"           # add | delete\n'
+    'SRCIP="${ALERTSRCIP:-}"\n'
+    '[ -z "$SRCIP" ] && exit 0\n'
     "\n"
-    "case \"$ACTION\" in\n"
+    'case "$ACTION" in\n'
     "  add)\n"
-    "    curl -sk -u \"$API_KEY:$API_SECRET\" -X POST \\\n"
-    "      \"$OPNSENSE_API/firewall/alias_utility/add/$ALIAS\" \\\n"
-    "      -d \"{\\\"address\\\":\\\"$SRCIP\\\"}\"\n"
+    '    curl -sk -u "$API_KEY:$API_SECRET" -X POST \\\n'
+    '      "$OPNSENSE_API/firewall/alias_utility/add/$ALIAS" \\\n'
+    '      -d "{\"address\":\"$SRCIP\"}"\n'
     "    ;;\n"
     "  delete)\n"
-    "    curl -sk -u \"$API_KEY:$API_SECRET\" -X POST \\\n"
-    "      \"$OPNSENSE_API/firewall/alias_utility/delete/$ALIAS\" \\\n"
-    "      -d \"{\\\"address\\\":\\\"$SRCIP\\\"}\"\n"
+    '    curl -sk -u "$API_KEY:$API_SECRET" -X POST \\\n'
+    '      "$OPNSENSE_API/firewall/alias_utility/delete/$ALIAS" \\\n'
+    '      -d "{\"address\":\"$SRCIP\"}"\n'
     "    ;;\n"
     "esac\n"
     "# Applique la nouvelle config firewall\n"
-    "curl -sk -u \"$API_KEY:$API_SECRET\" -X POST \"$OPNSENSE_API/firewall/apply\""
+    'curl -sk -u "$API_KEY:$API_SECRET" -X POST "$OPNSENSE_API/firewall/apply"'
 )
-story.append(Paragraph(block_code.replace('&', '&').replace('<', '<').replace('>', '>').replace('\n', '<br/>'), styles['code']))
+story.append(code_para(block_code))
 
 # ============================================================
 # 7. SCA — SECURITY CONFIGURATION ASSESSMENT
