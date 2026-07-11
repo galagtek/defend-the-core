@@ -3,6 +3,12 @@
 .env.local
 *.secret
 secrets/
+
+# Environnements virtuels Python
+.venv-pdf/
+.venv/
+__pycache__/
+*.pyc
 *.key
 *.pem
 *.p12
