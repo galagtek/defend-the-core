@@ -1,0 +1,75 @@
+# ====================================================================
+# Configuration client SSH du bastion — ProxyJump
+# ====================================================================
+# Ce fichier (~/.ssh/config sur le bastion, pour opsadmin) définit
+# comment le bastion se connecte aux serveurs critiques via ProxyJump.
+#
+# L'admin, depuis son poste Windows, lance UNE seule commande :
+#   ssh -J bastion ubuntu@10.10.30.10
+#
+# Le bastion agit comme "jump host" : la connexion SSH est relayée
+# sans que l'admin n'ait d'acces direct au VLAN 30.
+# ====================================================================
+
+# --- Configuration globale du client SSH ---
+Host *
+    # Clés uniquement, pas de mot de passe
+    PreferredAuthentications publickey
+    PubkeyAuthentication yes
+    PasswordAuthentication no
+
+    # Vérification stricte des hôtes (anti-MITM)
+    StrictHostKeyChecking ask
+    UserKnownHostsFile ~/.ssh/known_hosts
+
+    # Ne pas forwarder d'agent par défaut (sécurité)
+    ForwardAgent no
+    ForwardX11 no
+
+    # Conserver la connexion vivante
+    ServerAliveInterval 60
+    ServerAliveCountMax 2
+
+    # Algorithmes modernes uniquement
+    KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org
+    Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+
+    # Fichier d'identité par défaut (clé FIDO2)
+    IdentityFile ~/.ssh/id_ed25519_sk
+
+# --- Hôte : bastion lui-même (depuis le poste admin) ---
+Host bastion bastion-dtc 10.10.99.20
+    HostName 10.10.99.20
+    User opsadmin
+    Port 22
+    # Clé FIDO2 pour l'authentification au bastion
+    IdentityFile ~/.ssh/id_ed25519_sk
+    # Pas de ProxyJump : connexion directe au bastion
+    ProxyJump none
+
+# --- Serveurs critiques du VLAN 30 (via ProxyJump bastion) ---
+# Ubuntu Server (Web + BDD)
+Host ubuntu-web 10.10.30.10
+    HostName 10.10.30.10
+    User webadmin
+    Port 22
+    # ProxyJump : la connexion passe par le bastion
+    ProxyJump bastion
+    # Clé dédiée pour les serveurs (différente de celle du bastion)
+    IdentityFile ~/.ssh/id_ed25519_servers
+
+# Windows Server (AD) — si OpenSSH installé sur Windows
+Host win-server 10.10.30.20
+    HostName 10.10.30.20
+    User Administrator
+    Port 22
+    ProxyJump bastion
+    IdentityFile ~/.ssh/id_ed25519_servers
+
+# --- Wazuh (VLAN 99, accès direct depuis bastion, même zone) ---
+Host wazuh 10.10.99.10
+    HostName 10.10.99.10
+    User wazuh
+    Port 22
+    # Même VLAN : pas besoin de ProxyJump
+    IdentityFile ~/.ssh/id_ed25519_admin
