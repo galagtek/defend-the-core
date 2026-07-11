@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<!--
+  ============================================================
+  OPNsense — Modèle de configuration (export GitOps)
+  ============================================================
+  Ce fichier est un MODÈLE documentant la structure de la config
+  OPNsense pour traçabilité. La config réelle est appliquée via
+  les scripts API (scripts/*.sh), puis exportée depuis
+  l'interface web (System -> Configuration -> Backups) vers
+  export/config-applied.xml.
+
+  Plan d'adressage : 10.10.X.0/24 (X = VLAN id)
+  Politique : default-deny
+  ============================================================
+-->
+<opnsense>
+  <version>24.7</version>
+  <lastchange>0</lastchange>
+
+  <!-- ============ Système ============ -->
+  <system>
+    <hostname>opnsense-dtc</hostname>
+    <domain>defendcore.local</domain>
+    <timezone>Europe/Paris</timezone>
+    <timeservers>pool.ntp.org</timeservers>
+
+    <!-- Hardening web GUI -->
+    <webgui>
+      <protocol>https</protocol>
+      <port>8443</port>
+      <ssl-certref>cert_webgui</ssl-certref>
+      <nohttpreferercheck>1</nohttpreferercheck>
+      <session_timeout>30</session_timeout>
+      <authentication_timeout>1800</authentication_timeout>
+    </webgui>
+
+    <!-- Administrateur (mot de passe hashé, jamais en clair) -->
+    <user>
+      <name>root</name>
+      <descr>Administrateur principal</descr>
+      <scope>system</scope>
+      <bcrypt-hash>REPLACE_WITH_HASH</bcrypt-hash>
+      <uid>0</uid>
+      <priv>user-shell-access</priv>
+    </user>
+
+    <!-- Syslog distant vers Wazuh -->
+    <syslog>
+      <remoteserver>10.10.99.10</remoteserver>
+      <remoteserver_port>514</remoteserver_port>
+      <remoteserver_transport>udp</remoteserver_transport>
+    </syslog>
+  </system>
+
+  <!-- ============ Interfaces ============ -->
+  <interfaces>
+    <!-- WAN : NAT VirtualBox -->
+    <wan>
+      <if>vtnet0</if>
+      <enable>1</enable>
+      <ipaddr>dhcp</ipaddr>
+      <descr>WAN-Internet</descr>
+      <blockpriv>1</blockpriv>
+      <blockbogons>1</blockbogons>
+    </wan>
+
+    <!-- VLAN 10 : Bureautique -->
+    <lan>
+      <if>vtnet1</if>
+      <enable>1</enable>
+      <ipaddr>10.10.10.1</ipaddr>
+      <subnet>24</subnet>
+      <descr>VLAN10-Bureautique</descr>
+    </lan>
+
+    <!-- VLAN 20 : DMZ -->
+    <opt1>
+      <if>vtnet2</if>
+      <enable>1</enable>
+      <ipaddr>10.10.20.1</ipaddr>
+      <subnet>24</subnet>
+      <descr>VLAN20-DMZ</descr>
+    </opt1>
+
+    <!-- VLAN 30 : Critique -->
+    <opt2>
+      <if>vtnet3</if>
+      <enable>1</enable>
+      <ipaddr>10.10.30.1</ipaddr>
+      <subnet>24</subnet>
+      <descr>VLAN30-Critique</descr>
+    </opt2>
+
+    <!-- VLAN 99 : Admin / SIEM -->
+    <opt3>
+      <if>vtnet4</if>
+      <enable>1</enable>
+      <ipaddr>10.10.99.1</ipaddr>
+      <subnet>24</subnet>
+      <descr>VLAN99-Admin-SIEM</descr>
+    </opt3>
+  </interfaces>
+
+  <!-- ============ DHCP ============ -->
+  <dhcpd>
+    <lan>
+      <enable>1</enable>
+      <range>
+        <from>10.10.10.100</from>
+        <to>10.10.10.200</to>
+      </range>
+      <defaultleasetime>7200</defaultleasetime>
+    </lan>
+    <!-- opt1, opt2, opt3 : pas de DHCP (adresses statiques) -->
+  </dhcpd>
+
+  <!-- ============ Alias réseau ============ -->
+  <aliases>
+    <alias><name>net_vlan10</name><type>network</type><content>10.10.10.0/24</content></alias>
+    <alias><name>net_vlan20</name><type>network</type><content>10.10.20.0/24</content></alias>
+    <alias><name>net_vlan30</name><type>network</type><content>10.10.30.0/24</content></alias>
+    <alias><name>net_vlan99</name><type>network</type><content>10.10.99.0/24</content></alias>
+    <alias><name>host_wazuh</name><type>host</type><content>10.10.99.10</content></alias>
+    <alias><name>host_bastion</name><type>host</type><content>10.10.99.20</content></alias>
+    <alias><name>host_reverse_proxy</name><type>host</type><content>10.10.20.10</content></alias>
+    <alias><name>host_vpn</name><type>host</type><content>10.10.20.20</content></alias>
+    <alias><name>host_ubuntu_web</name><type>host</type><content>10.10.30.10</content></alias>
+    <alias><name>host_win_server</name><type>host</type><content>10.10.30.20</content></alias>
+    <!-- Alias dynamique pour active response Wazuh -->
+    <alias><name>wazuh_blocked_ips</name><type>host</type><content></content><descr>IPs bloquées par Wazuh</descr></alias>
+  </aliases>
+
+  <!-- ============ Règles de filtrage (extrait) ============ -->
+  <filter>
+    <!-- BLOCK prioritaires : isolation des zones sensibles -->
+    <rule><type>block</type><interface>lan</interface><source><network>net_vlan10</network></source><destination><network>net_vlan30</network></destination><descr>Block VLAN10->VLAN30</descr><log>1</log></rule>
+    <rule><type>block</type><interface>lan</interface><source><network>net_vlan10</network></source><destination><network>net_vlan99</network></destination><descr>Block VLAN10->VLAN99</descr><log>1</log></rule>
+
+    <!-- ALLOW : flux métier explicites -->
+    <rule><type>pass</type><interface>lan</interface><protocol>tcp</protocol><source><network>net_vlan10</network></source><destination><address>host_reverse_proxy</address><port>80,443</port></destination><descr>VLAN10->ReverseProxy HTTP(S)</descr><log>1</log></rule>
+
+    <!-- Administration : bastion -> SSH serveurs critiques -->
+    <rule><type>pass</type><interface>opt3</interface><protocol>tcp</protocol><source><address>host_bastion</address></source><destination><network>net_vlan30</network><port>22</port></destination><descr>Bastion->SSH serveurs</descr><log>1</log></rule>
+
+    <!-- Logs SIEM -->
+    <rule><type>pass</type><interface>opt2</interface><protocol>tcp</protocol><source><network>net_vlan30</network></source><destination><address>host_wazuh</address><port>1514</port></destination><descr>VLAN30->Wazuh logs</descr><log>1</log></rule>
+
+    <!-- Default deny explicite -->
+    <rule><type>block</type><interface>lan</interface><source><any></any></source><destination><any></any></destination><descr>Default deny VLAN10</descr><log>1</log></rule>
+    <rule><type>block</type><interface>opt1</interface><source><any></any></source><destination><any></any></destination><descr>Default deny VLAN20</descr><log>1</log></rule>
+    <rule><type>block</type><interface>opt2</interface><source><any></any></source><destination><any></any></destination><descr>Default deny VLAN30</descr><log>1</log></rule>
+    <rule><type>block</type><interface>opt3</interface><source><any></any></source><destination><any></any></destination><descr>Default deny VLAN99</descr><log>1</log></rule>
+    <rule><type>block</type><interface>wan</interface><source><any></any></source><destination><any></any></destination><descr>Default deny WAN</descr><log>1</log></rule>
+  </filter>
+
+  <!-- ============ NAT ============ -->
+  <nat>
+    <outbound>
+      <mode>hybrid</mode>
+      <rule><interface>wan</interface><source><network>net_vlan10</network></source><destination><any></any></destination><target>interface</target><descr>NAT VLAN10->WAN</descr></rule>
+      <rule><interface>wan</interface><source><network>net_vlan20</network></source><destination><any></any></destination><target>interface</target><descr>NAT VLAN20->WAN</descr></rule>
+      <rule><interface>wan</interface><source><network>net_vlan99</network></source><destination><any></any></destination><target>interface</target><descr>NAT VLAN99->WAN</descr></rule>
+    </outbound>
+    <!-- Port forwarding -->
+    <rule><interface>wan</interface><protocol>tcp</protocol><destination><port>443</port></destination><target>host_reverse_proxy</target><local-port>443</local-port><descr>Forward 443->ReverseProxy</descr></rule>
+    <rule><interface>wan</interface><protocol>udp</protocol><destination><port>51820</port></destination><target>host_vpn</target><local-port>51820</local-port><descr>Forward 51820->VPN</descr></rule>
+  </nat>
+</opnsense>
