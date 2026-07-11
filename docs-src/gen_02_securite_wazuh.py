@@ -7,11 +7,10 @@ active response (blocage automatique via API OPNsense), SCA, dashboards,
 choix Wazuh vs alternatives.
 """
 import sys, os
-from xml.sax.saxutils import escape as _xml_escape
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pdf_common import *
-from reportlab.platypus import Paragraph, Spacer, PageBreak, Table, TableStyle, HRFlowable
+from reportlab.platypus import Paragraph, Spacer, PageBreak, Table, TableStyle, HRFlowable, Preformatted
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.lib.styles import ParagraphStyle
 
@@ -23,11 +22,27 @@ OUTPUT = os.path.join(os.path.dirname(__file__), '..', 'docs', '02_securite_wazu
 doc = build_doc(OUTPUT, "Defend-The-Core — Sécurité & Wazuh")
 story = []
 
+# Entités XML construites à l'exécution. Les valeurs "&", "<", ">"
+# écrites en clair dans la source seraient décodées en &, <, > par le script
+# code.sanitize, ce qui casserait le parseur XML de ReportLab. On les assemble
+# donc à partir de morceaux neutres.
+AMP = chr(38) + "amp;"   # -> "&" à l'exécution
+LT  = chr(38) + "lt;"    # -> "<"  à l'exécution
+GT  = chr(38) + "gt;"    # -> ">"  à l'exécution
+
+# Style monospace préservant les espaces (alignement des diagrammes / code).
+_pre_style = ParagraphStyle(
+    name='CodePre', fontName='CodeFont', fontSize=8.0, leading=10.5,
+    textColor=TEXT_PRIMARY, leftIndent=12, rightIndent=12,
+    spaceBefore=6, spaceAfter=6, backColor=BG_PAGE,
+    borderColor=BG_SURFACE, borderWidth=0.5, borderPadding=6,
+)
+
 
 def code_para(text):
-    """Prépare un bloc de code pour le style 'code' :
-    échappe les caractères XML (&, <, >) puis convertit les sauts de ligne."""
-    return Paragraph(_xml_escape(text).replace('\n', '<br/>'), styles['code'])
+    """Bloc de code préformaté : préserve l'indentation et les espaces
+    (style <pre>), sans interpréter le XML. Aucune échappement nécessaire."""
+    return Preformatted(text, _pre_style)
 
 
 # ============================================================
@@ -36,7 +51,7 @@ def code_para(text):
 story.append(Spacer(1, 80))
 story.append(Paragraph("Defend-The-Core", styles['title']))
 story.append(HRFlowable(width="40%", thickness=2, color=ACCENT, spaceBefore=6, spaceAfter=12))
-story.append(Paragraph("Annexe 2 : Sécurité & Wazuh (SIEM/XDR)", styles['subtitle']))
+story.append(Paragraph("Annexe 2 : Sécurité " + AMP + " Wazuh (SIEM/XDR)", styles['subtitle']))
 story.append(Spacer(1, 20))
 story.append(Paragraph(
     "Surveillance centralisée, corrélation d'événements et réaction "
@@ -46,7 +61,7 @@ story.append(Paragraph(
 ))
 story.append(Spacer(1, 40))
 story.append(Paragraph(
-    "SIEM/XDR · Active Response · MITRE ATT&CK · CIS Benchmark · OPNsense API",
+    "SIEM/XDR · Active Response · MITRE ATT" + AMP + "CK · CIS Benchmark · OPNsense API",
     ParagraphStyle('Tags', fontName='HeadFont', fontSize=10, leading=14,
                    textColor=ACCENT, alignment=TA_LEFT)
 ))
@@ -251,7 +266,7 @@ syslog_code = (
 )
 story.append(code_para(syslog_code))
 story.append(Paragraph(
-    "Côté OPNsense, une règle d'export syslog (Interface > Logs > Settings) "
+    "Côté OPNsense, une règle d'export syslog (Interface " + GT + " Logs " + GT + " Settings) "
     "enverra les événements de firewall, IDS et auth vers 10.10.99.10:514.",
     styles['body']
 ))
@@ -304,7 +319,9 @@ linux_code = (
     "    >> /etc/nixos/wazuh.nix\n"
     "  nixos-rebuild switch\n"
     "elif grep -qi debian /etc/os-release; then\n"
-    "  curl -so wazuh-agent.deb https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.7.0-1_amd64.deb\n"
+    "  curl -so wazuh-agent.deb \\\n"
+    "    https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/\n"
+    "    wazuh-agent_4.7.0-1_amd64.deb\n"
     '  WAZUH_MANAGER="$MANAGER_IP" WAZUH_GROUP="$GROUP" dpkg -i wazuh-agent.deb\n'
     "  systemctl enable --now wazuh-agent\n"
     "else  # famille RPM (RHEL/Fedora/CentOS)\n"
@@ -359,21 +376,21 @@ story.append(Paragraph(
     "100100 à 100900) sont ajoutées dans "
     "<font name='CodeFont'>/var/ossec/etc/rules/local_rules.xml</font>. Elles "
     "ciblent les scénarios d'attaque spécifiques au lab et sont annotées avec "
-    "les techniques <b>MITRE ATT&CK</b> correspondantes.",
+    "les techniques <b>MITRE ATT" + AMP + "CK</b> correspondantes.",
     styles['body']
 ))
 
 story.append(Spacer(1, 6))
 story.append(Paragraph("<b>Tableau 4 — Règles de corrélation personnalisées</b>", styles['caption']))
 rules_data = [
-    ["ID", "Niveau", "Déclencheur", "MITRE ATT&CK"],
+    ["ID", "Niveau", "Déclencheur", "MITRE ATT" + AMP + "CK"],
     ["100100", "10", "Bruteforce SSH : 5 échecs puis 1 succès / 1 min", "T1110 Brute Force"],
     ["100200", "7", "Scan Nmap détecté (auditd connect() sur plage)", "T1046 Network Service Discovery"],
     ["100300", "12", "Mouvement latéral : SSH vers un autre VLAN depuis un poste", "T1021 Remote Services"],
     ["100400", "11", "Modification de fichier de config système (sshd, sudoers)", "T1543.002 Persistence"],
     ["100500", "12", "Persistance / backdoor : cron atypique ou clé SSH ajoutée", "T1053.003 Cron"],
     ["100600", "10", "Désactivation d'UFW ou de auditd", "T1562 Impair Defenses"],
-    ["100700", "9", "Exécution de reverse shell (bash -i >& /dev/tcp)", "T1059 Command Scripting"],
+    ["100700", "9", "Exécution de reverse shell (bash -i " + GT + AMP + " /dev/tcp)", "T1059 Command " + AMP + " Scripting"],
     ["100800", "11", "Création de compte utilisateur en dehors des heures ouvrées", "T1136 Create Account"],
     ["100900", "13", "Plusieurs règles critiques (100300+100500) en 5 min", "TA0001 Initial Access"],
 ]
@@ -406,7 +423,7 @@ rule_xml = (
 )
 story.append(code_para(rule_xml))
 story.append(Paragraph(
-    "Le niveau 10 (> 7) déclenche automatiquement l'active response (voir "
+    "Le niveau 10 (" + GT + " 7) déclenche automatiquement l'active response (voir "
     "section 6) : l'IP source est poussée dans l'alias OPNsense et bloquée sans "
     "intervention manuelle.",
     styles['body']

@@ -21,7 +21,7 @@ story = []
 # ============================================================
 # PAGE DE TITRE
 # ============================================================
-story.append(Spacer(1, 70))
+story.append(Spacer(1, 50))
 story.append(Paragraph("Defend-The-Core", styles['title']))
 story.append(HRFlowable(width="40%", thickness=2, color=ACCENT, spaceBefore=6, spaceAfter=12))
 story.append(Paragraph("Infrastructure PME critique sécurisée", styles['subtitle']))
@@ -32,13 +32,13 @@ story.append(Paragraph(
     ParagraphStyle('Desc', fontName='BodyFont', fontSize=11, leading=16,
                    textColor=TEXT_MUTED, alignment=TA_LEFT)
 ))
-story.append(Spacer(1, 40))
+story.append(Spacer(1, 30))
 story.append(Paragraph(
     "Immuabilité déclarative · ProxyJump · FIDO2 · Défense en profondeur",
     ParagraphStyle('Tags', fontName='HeadFont', fontSize=10, leading=14,
                    textColor=ACCENT, alignment=TA_LEFT)
 ))
-story.append(Spacer(1, 8))
+story.append(Spacer(1, 6))
 story.append(Paragraph(
     "« La star du projet : si un attaquant modifie /etc/ssh/sshd_config, "
     "NixOS l'écrasera au prochain déploiement. »",
@@ -163,10 +163,10 @@ story.append(Paragraph(
 story.append(add_heading("2.2. Comparaison avec d'autres systèmes", styles, 1))
 story.append(Paragraph(
     "Le tableau suivant compare NixOS aux distributions classiques sur les critères qui "
-    "comptent pour un bastion d'administration. L'objectif n'est pas de dénigrer Ubuntu "
-    "ou Debian — excellents pour les serveurs métier durcis via CIS Benchmark — mais de "
-    "mettre en évidence la propriété unique de NixOS : la <b>non-persistance</b> des "
-    "modifications non déclarées.",
+    "comptent pour un bastion. L'objectif n'est pas de dénigrer Ubuntu ou Debian — "
+    "excellents pour les serveurs métier durcis via CIS Benchmark — mais de mettre en "
+    "évidence la propriété unique de NixOS : la <b>non-persistance</b> des modifications "
+    "non déclarées.",
     styles['body']
 ))
 cmp_data = [
@@ -200,9 +200,9 @@ story.append(Spacer(1, 6))
 story.append(Paragraph("<b>Tableau 1 — NixOS face aux distributions classiques</b>", styles['caption']))
 story.append(make_table(cmp_data, col_ratios=[0.22, 0.30, 0.24, 0.24]))
 story.append(Paragraph(
-    "Cette propriété d'anti-persistance est ce qui justifie NixOS <i>spécifiquement</i> "
-    "pour le bastion, là où Ubuntu et Debian suffisent pour les serveurs métier (VLAN 30) "
-    "dont la configuration est durcie mais reste ponctuellement éditable.",
+    "Cette anti-persistance justifie NixOS <i>spécifiquement</i> pour le bastion, là où "
+    "Ubuntu et Debian suffisent pour les serveurs métier (VLAN 30) dont la configuration "
+    "est durcie mais reste ponctuellement éditable.",
     styles['body']
 ))
 
@@ -297,10 +297,9 @@ story.append(Paragraph(
 story.append(add_heading("4. configuration.nix — analyse détaillée", styles, 0))
 story.append(Paragraph(
     "Cette section décompose la configuration du bastion, bloc par bloc. Le fichier "
-    "complet est versionné dans le dépôt (<font name='CodeFont'>bastion/configuration.nix</font>) ; "
-    "les extraits ci-dessous en montrent les parties significatives avec leur rationale "
-    "de sécurité. Chaque directive répond à une recommandation précise du guide de "
-    "durcissement ANSSI / CIS.",
+    "complet est versionné (<font name='CodeFont'>bastion/configuration.nix</font>) ; "
+    "les extraits ci-dessous en montrent les parties significatives. Chaque directive "
+    "répond à une recommandation ANSSI / CIS.",
     styles['body']
 ))
 
@@ -376,10 +375,9 @@ story.append(Spacer(1, 6))
 story.append(Paragraph("<b>Tableau 3 — Suite cryptographique durcie (KexAlgorithms, Ciphers, MACs)</b>", styles['caption']))
 story.append(make_table(crypto_data, col_ratios=[0.16, 0.30, 0.24, 0.30]))
 story.append(Paragraph(
-    "Restreindre la liste des algorithmes à un jeu moderne et homogène réduit la surface "
-    "d'attaque (pas de négociation vers un algorithme faible) et facilite l'audit : un "
-    "algorithme nouveau ou inattendu apparaissant dans les logs trahit immédiatement une "
-    "anomalie.",
+    "Restreindre la liste à un jeu moderne et homogène réduit la surface d'attaque (pas "
+    "de négociation vers un algorithme faible) et facilite l'audit : un algorithme "
+    "inattendu dans les logs trahit immédiatement une anomalie.",
     styles['body']
 ))
 
@@ -448,12 +446,6 @@ sysctl_data = [
      "Résistance au SYN flood (épuisement de la table des connexions)"],
     ["net.ipv4.conf.all.log_martians", "1",
      "Journalise les paquets impossibles/illégaux (détection d'attaque)"],
-    ["net.ipv4.icmp_echo_ignore_broadcasts", "1",
-     "Anti-smurf : ignore les echo broadcasts"],
-    ["net.ipv4.ip_forward", "0",
-     "Pas de routage : le bastion n'est pas un routeur"],
-    ["fs.suid_dumpable", "0",
-     "Pas de core dump pour les binaires setuid (fuite d'infos)"],
 ]
 story.append(Spacer(1, 6))
 story.append(Paragraph("<b>Tableau 5 — Paramètres sysctl durcis du bastion</b>", styles['caption']))
@@ -806,13 +798,12 @@ story.append(Paragraph(
     styles['callout']
 ))
 story.append(Paragraph(
-    "Cette phrase résume à elle seule la valeur ajoutée du bastion : là où un durcissement "
-    "classique rend l'attaque <i>difficile</i>, l'immuabilité déclarative de NixOS la "
-    "rend <i>non durable</i>. Combinée à l'authentification FIDO2 (anti-clonage), au "
-    "ProxyJump (pas de route directe vers les serveurs) et à la journalisation centralisée "
-    "(toute session est corrélée dans Wazuh), elle réalise une posture d'administration "
-    "privilégiée alignée sur les recommandations ANSSI — et argumentable en entretien "
-    "avec une démonstration reproductible.",
+    "Cette phrase résume la valeur ajoutée du bastion : là où un durcissement classique "
+    "rend l'attaque <i>difficile</i>, l'immuabilité déclarative de NixOS la rend "
+    "<i>non durable</i>. Combinée à l'authentification FIDO2 (anti-clonage), au ProxyJump "
+    "(pas de route directe vers les serveurs) et à la journalisation centralisée (toute "
+    "session est corrélée dans Wazuh), elle réalise une posture d'administration "
+    "privilégiée alignée sur les recommandations ANSSI — et démontrable en entretien.",
     styles['body']
 ))
 story.append(Paragraph(
