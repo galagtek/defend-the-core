@@ -40,7 +40,7 @@
     }];
   };
   networking.defaultGateway = "10.10.99.1";
-  networking.nameservers = [ "10.10.30.20" "1.1.1.1" ];  # AD + fallback
+  networking.nameservers = [ "10.10.50.20" "1.1.1.1" ];  # AD + fallback
 
   # ----------------------------------------------------------------
   # 3. PARE-FEU LOCAL (défense en profondeur)
@@ -122,7 +122,7 @@
         publicKey = "ssh-ed25519 AAAA... remplacer_par_clé_publique_ubuntu_web";
       };
       win-server = {
-        hostNames = [ "10.10.30.20" ];
+        hostNames = [ "10.10.50.20" ];
         publicKey = "ssh-ed25519 AAAA... remplacer_par_clé_publique_win_server";
       };
     };

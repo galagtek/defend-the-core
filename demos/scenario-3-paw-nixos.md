@@ -104,7 +104,7 @@ Bastion NixOS (VLAN 99, 10.10.99.20)
     ▼
 Serveurs critiques (VLAN 30)
     - Ubuntu Web+BDD (10.10.30.10)
-    - Windows Server AD (10.10.30.20)
+    - Windows Server AD (10.10.50.20)
 ```
 
 ## Points clés à montrer en entretien

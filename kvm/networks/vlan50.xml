@@ -1,0 +1,17 @@
+<!--
+  ============================================================
+  VLAN 50 — Zone Active Directory (identité, isolée)
+  ============================================================
+  Réseau KVM isolé (pas de <forward>, pas de <ip>).
+  OPNsense (10.10.50.1) est le SEUL à posséder une IP.
+  Le Windows Server AD (10.10.50.20) s'y connecte.
+
+  Justification sécurité : l'AD est la cible n°1 d'un attaquant.
+  L'isoler dans son propre VLAN empêche qu'un serveur compromis
+  dans le VLAN 30 puisse l'atteindre directement.
+  ============================================================
+-->
+<network>
+  <name>vlan50</name>
+  <bridge name="virbr50" stp="off" delay="0"/>
+</network>

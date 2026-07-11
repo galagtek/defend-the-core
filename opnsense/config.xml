@@ -125,7 +125,7 @@
     <alias><name>host_reverse_proxy</name><type>host</type><content>10.10.20.10</content></alias>
     <alias><name>host_vpn</name><type>host</type><content>10.10.20.20</content></alias>
     <alias><name>host_ubuntu_web</name><type>host</type><content>10.10.30.10</content></alias>
-    <alias><name>host_win_server</name><type>host</type><content>10.10.30.20</content></alias>
+    <alias><name>host_win_server</name><type>host</type><content>10.10.50.20</content></alias>
     <!-- Alias dynamique pour active response Wazuh -->
     <alias><name>wazuh_blocked_ips</name><type>host</type><content></content><descr>IPs bloquées par Wazuh</descr></alias>
   </aliases>

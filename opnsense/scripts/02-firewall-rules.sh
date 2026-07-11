@@ -44,7 +44,7 @@ declare -A ALIASES=(
     ["host_reverse_proxy"]="10.10.20.10"
     ["host_vpn"]="10.10.20.20"
     ["host_ubuntu_web"]="10.10.30.10"
-    ["host_win_server"]="10.10.30.20"
+    ["host_win_server"]="10.10.50.20"
     ["host_win10"]="10.10.10.50"
 )
 

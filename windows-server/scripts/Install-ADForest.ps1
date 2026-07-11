@@ -22,7 +22,7 @@ param(
     [string]$DSRMPassword,
 
     [Parameter(Mandatory=$false)]
-    [string]$ServerIP = "10.10.30.20"
+    [string]$ServerIP = "10.10.50.20"
 )
 
 $ErrorActionPreference = "Stop"

@@ -29,8 +29,8 @@ log "Autorisation HTTP/HTTPS uniquement depuis le reverse proxy (10.10.20.10)...
 ufw allow from 10.10.20.10 to any port 80 proto tcp comment 'Reverse proxy HTTP'
 ufw allow from 10.10.20.10 to any port 443 proto tcp comment 'Reverse proxy HTTPS'
 
-# DNS : depuis le Windows Server AD (10.10.30.20)
-log "Autorisation DNS vers l'AD (10.10.30.20)..."
+# DNS : depuis le Windows Server AD (10.10.50.20)
+log "Autorisation DNS vers l'AD (10.10.50.20)..."
 # (le serveur interroge l'AD pour la résolution, c'est du sortant — déjà allow)
 
 # Wazuh : flux de logs sortant vers le SIEM (déjà allow par défaut outgoing)

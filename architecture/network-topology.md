@@ -84,7 +84,7 @@ Voir le fichier tabulaire [`addressing-plan.csv`](addressing-plan.csv).
 | Reverse proxy | 20 | 10.10.20.10 | Proxy inverse (DMZ) | Ubuntu 26.04 |
 | VPN gateway | 20 | 10.10.20.20 | Accès distant | Ubuntu 26.04 |
 | Ubuntu (Web+BDD) | 30 | 10.10.30.10 | Serveur métier | Ubuntu 26.04 |
-| Windows Server (AD) | 30 | 10.10.30.20 | AD/DNS/DHCP | Windows Server 2022 |
+| Windows Server (AD) | 30 | 10.10.50.20 | AD/DNS/DHCP | Windows Server 2022 |
 | Wazuh (SIEM) | 99 | 10.10.99.10 | SIEM/XDR | Ubuntu 26.04 |
 | Bastion NixOS (PAW) | 99 | 10.10.99.20 | Administration | NixOS |
 

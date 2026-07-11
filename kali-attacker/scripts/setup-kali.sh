@@ -12,7 +12,7 @@ log() { echo "[$(date +%H:%M:%S)] $*"; }
 
 KALI_IP="10.10.10.100"
 GATEWAY="10.10.10.1"
-DNS="10.10.30.20"
+DNS="10.10.50.20"
 
 log "=== Configuration Kali (machine attaquant, VLAN 10) ==="
 

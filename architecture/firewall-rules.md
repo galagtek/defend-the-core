@@ -32,7 +32,7 @@ VLAN 10 est **jamais** initié.
 | 5 | vlan10 | net 10.10.10.0/24 | WAN | 53, 80, 443 | TCP/UDP | allow | no | DNS + HTTP(S) sortant (via OPNsense) |
 | 6 | vlan20 | 10.10.20.10 | 10.10.30.10 | 80, 443 | TCP | allow | yes | Reverse proxy → Web métier |
 | 7 | vlan20 | 10.10.20.20 | 10.10.30.0/24 | any | any | **block** | yes | VPN ne doit pas atteindre la BDD directement |
-| 8 | vlan30 | 10.10.30.10 | 10.10.30.20 | 53 | TCP/UDP | allow | no | Web → AD pour résolution DNS |
+| 8 | vlan30 | 10.10.30.10 | 10.10.50.20 | 53 | TCP/UDP | allow | no | Web → AD pour résolution DNS |
 | 9 | vlan30 | net 10.10.30.0/24 | 10.10.99.10 | 1514, 1515 | TCP | allow | yes | Flux de logs des serveurs vers Wazuh |
 | 10 | vlan30 | net 10.10.30.0/24 | 10.10.99.0/24 | any | any | **block** | yes | Aucun autre flux vers l'admin |
 | 11 | vlan99 | 10.10.99.20 | 10.10.30.0/24 | 22 | TCP | allow | yes | SSH admin du bastion vers les serveurs |
@@ -49,16 +49,22 @@ VLAN 10 est **jamais** initié.
 ## 4. Tableau de synthèse inter-VLAN
 
 ```
-                ┌─────────────────── Vers ───────────────────┐
-                │  VLAN10  VLAN20  VLAN30  VLAN99   WAN       │
-   ┌────────────┼─────────────────────────────────────────────┤
-   │ VLAN 10    │   —     80/443  BLOCK  BLOCK   53/80/443    │
-   │ VLAN 20    │   —      —     80/443 BLOCK   (nat out)    │
-De│ VLAN 30    │   —      —      —     1514     (nat out)    │
-   │ VLAN 99    │   —      —      22     —       123/443     │
-   │ WAN        │   —     443    BLOCK  BLOCK     —          │
-   └────────────┴─────────────────────────────────────────────┘
+                ┌──────────────────────── Vers ─────────────────────────┐
+                │  VLAN10  VLAN20  VLAN30  VLAN50  VLAN99   WAN          │
+   ┌────────────┼──────────────────────────────────────────────────────────┤
+   │ VLAN 10    │   —     80/443  BLOCK  AD ports  BLOCK   53/80/443     │
+   │ VLAN 20    │   —      —     80/443 BLOCK  BLOCK   (nat out)        │
+De│ VLAN 30    │   —      —      —     53      BLOCK   (nat out)        │
+   │ VLAN 50    │   —      —      —      —      BLOCK   (nat out)        │
+   │ VLAN 99    │   —      —      22     —       —       123/443         │
+   │ WAN        │   —     443    BLOCK  BLOCK  BLOCK     —              │
+   └────────────┴──────────────────────────────────────────────────────────┘
 ```
+
+> **Note sur le VLAN 50 (Active Directory)** : l'AD est isolé dans son propre VLAN.
+> Le VLAN 10 ne peut joindre l'AD que sur les ports AD (53, 88, 135, 139, 389, 445, 464, 636, 3268).
+> Le VLAN 30 ne peut joindre l'AD que sur le port 53 (DNS).
+> Cette isolation suit la recommandation ANSSI de cloisonner les services d'identité.
 
 ## 5. Active Response (intégration Wazuh)
 
