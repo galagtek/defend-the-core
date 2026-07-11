@@ -5,7 +5,7 @@
 # autres scripts (redémarrage requis après promotion).
 #
 # Usage (en administrateur) :
-#   .\Install-ADForest.ps1 -DomainName "defendcore.local" `
+#   .\Install-ADForest.ps1 -DomainName "defendcore.internal" `
 #                           -NetBIOSName "DEFENDCORE" `
 #                           -DSRMPassword "MotDePasseFort!"
 # ============================================================
@@ -13,7 +13,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
-    [string]$DomainName = "defendcore.local",
+    [string]$DomainName = "defendcore.internal",
 
     [Parameter(Mandatory=$false)]
     [string]$NetBIOSName = "DEFENDCORE",

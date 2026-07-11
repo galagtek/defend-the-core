@@ -8,13 +8,12 @@
   communiquent entre elles. OPNsense fait le pont vers les
   autres VLANs.
 
-  OPNsense (10.10.10.1) sera la passerelle et le serveur DHCP.
-  Les postes clients (Win10, Kali) s'y connectent.
+  Pas de balise <ip> : OPNsense (10.10.10.1) est le SEUL
+  à posséder une IP sur ce réseau. Si on laissait l'IP sur
+  le bridge, il y aurait un conflit d'adresses.
   ============================================================
 -->
 <network>
   <name>vlan10</name>
-  <!-- Pas de <forward> = réseau isolé (coupé de l'hôte et d'Internet) -->
   <bridge name="virbr10" stp="off" delay="0"/>
-  <ip address="10.10.10.1" netmask="255.255.255.0"/>
 </network>

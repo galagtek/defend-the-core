@@ -20,7 +20,7 @@
   <!-- ============ Système ============ -->
   <system>
     <hostname>opnsense-dtc</hostname>
-    <domain>defendcore.local</domain>
+    <domain>defendcore.internal</domain>
     <timezone>Europe/Paris</timezone>
     <timeservers>pool.ntp.org</timeservers>
 

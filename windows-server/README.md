@@ -25,7 +25,7 @@ Contrôleur de domaine Active Directory, DNS et DHCP pour la **zone critique**
 ## Ordre d'exécution (en administrateur)
 
 ```powershell
-.\scripts\Install-ADForest.ps1 -DomainName "defendcore.local" -DSRMPassword "..."
+.\scripts\Install-ADForest.ps1 -DomainName "defendcore.internal" -DSRMPassword "..."
 # Redémarrage requis après promotion AD
 .\scripts\Configure-DNS-DHCP.ps1
 .\scripts\Install-WazuhAgent.ps1 -ManagerIp "10.10.99.10" -AgentName "win-server"

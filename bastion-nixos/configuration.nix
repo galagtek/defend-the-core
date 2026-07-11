@@ -24,7 +24,7 @@
   # 1. IDENTITÉ SYSTÈME
   # ----------------------------------------------------------------
   networking.hostName = "bastion-dtc";      # Nom d'hôte du bastion
-  networking.domain = "defendcore.local";   # Domaine interne
+  networking.domain = "defendcore.internal";   # Domaine interne
   time.timeZone = "Europe/Paris";           # Fuseau horaire
 
   # ----------------------------------------------------------------

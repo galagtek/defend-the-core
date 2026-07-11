@@ -11,7 +11,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [string]$DomainName = "defendcore.local"
+    [string]$DomainName = "defendcore.internal"
 )
 
 $ErrorActionPreference = "Stop"
