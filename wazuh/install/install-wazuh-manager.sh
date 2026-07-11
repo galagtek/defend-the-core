@@ -2,7 +2,7 @@
 # ============================================================
 # Wazuh — Installation du manager + indexer + dashboard
 # ============================================================
-# Installe la stack Wazuh complète sur Ubuntu 22.04 (VLAN 99).
+# Installe la stack Wazuh complète sur Ubuntu 26.04 (VLAN 99).
 # Utilise le script d'installation officiel wazuh-install.sh.
 #
 # Composants installés :
@@ -10,7 +10,7 @@
 #   - Wazuh Manager  (corrélation, règles, active response)
 #   - Wazuh Dashboard (UI, fork Kibana)
 #
-# Pré-requis : Ubuntu 22.04, 8Go RAM min, accès Internet
+# Pré-requis : Ubuntu 26.04, 8Go RAM min, accès Internet
 # ============================================================
 set -euo pipefail
 
@@ -36,7 +36,7 @@ err() { echo "[$(date +%H:%M:%S)] ERREUR: $*" >&2; exit 1; }
 [[ "$(id -u)" -eq 0 ]] || err "Ce script doit être exécuté en root (sudo)."
 
 # --- Vérification OS ---
-[[ -f /etc/os-release ]] || err "OS non supporté (Ubuntu 22.04 requis)."
+[[ -f /etc/os-release ]] || err "OS non supporté (Ubuntu 26.04 requis)."
 . /etc/os-release
 log "OS détecté : $PRETTY_NAME"
 

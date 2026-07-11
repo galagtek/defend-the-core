@@ -1,4 +1,4 @@
-# Ubuntu Server 22.04 — Serveur Web + BDD (Zone Critique)
+# Ubuntu Server 26.04 — Serveur Web + BDD (Zone Critique)
 
 ## Rôle
 
@@ -8,7 +8,7 @@ bureautique : seule l'administration passe par le bastion (ProxyJump).
 
 ## Pré-requis
 
-- VM Ubuntu 22.04 LTS (2 vCPU, 4 Go RAM, 30 Go disque)
+- VM Ubuntu 26.04 LTS (2 vCPU, 4 Go RAM, 30 Go disque)
 - Réseau interne VirtualBox `vbox-vlan30`
 - IP statique : 10.10.30.10 / Passerelle : 10.10.30.1
 
@@ -20,7 +20,7 @@ bureautique : seule l'administration passe par le bastion (ProxyJump).
 | Auditd | Surveillance fichiers sensibles + commandes |
 | Pare-feu | UFW : uniquement 22 (bastion) + 80/443 (reverse proxy) |
 | sysctl | ASLR, anti-spoofing, SYN flood, restrictions kernel |
-| CIS | Durcissement essentiel (CIS Benchmark Ubuntu 22.04) |
+| CIS | Durcissement essentiel (CIS Benchmark Ubuntu 26.04) |
 | Wazuh | Agent installé + SCA (Security Configuration Assessment) |
 
 ## Scripts

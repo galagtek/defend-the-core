@@ -1,0 +1,15 @@
+<!--
+  ============================================================
+  VLAN 99 — Zone Admin / SIEM (très restreint)
+  ============================================================
+  Réseau KVM isolé (pas de <forward>).
+  OPNsense (10.10.99.1) est la passerelle.
+  Wazuh (SIEM) et le Bastion NixOS (PAW) s'y connectent.
+  Zone la plus sensible : seuls les flux de logs et SSH admin y entrent.
+  ============================================================
+-->
+<network>
+  <name>vlan99</name>
+  <bridge name="virbr99" stp="off" delay="0"/>
+  <ip address="10.10.99.1" netmask="255.255.255.0"/>
+</network>

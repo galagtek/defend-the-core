@@ -308,7 +308,7 @@
   # On active donc seulement le channel de sécurité et on notifie.
   system.autoUpgrade = {
     enable = true;
-    channel = "https://nixos.org/channels/nixos-24.05-small";
+    channel = "https://nixos.org/channels/nixos-25.11-small";
     # Ne pas reboot automatiquement : l'admin valide
     allowReboot = false;
     # Fréquence : une fois par jour
@@ -358,5 +358,5 @@
   # 16. VERSION SYSTÈME (NixOS)
   # ----------------------------------------------------------------
   # Cette déclaration permet de suivre l'évolution de la config.
-  system.stateVersion = "24.05";           # Version NixOS de référence
+  system.stateVersion = "25.11";           # Version NixOS de référence
 }

@@ -1,0 +1,15 @@
+<!--
+  ============================================================
+  VLAN 20 — Zone DMZ (services publics)
+  ============================================================
+  Réseau KVM isolé (pas de <forward>).
+  OPNsense (10.10.20.1) est la passerelle.
+  Le reverse proxy et la passerelle VPN s'y connectent.
+  Adresses statiques uniquement (pas de DHCP).
+  ============================================================
+-->
+<network>
+  <name>vlan20</name>
+  <bridge name="virbr20" stp="off" delay="0"/>
+  <ip address="10.10.20.1" netmask="255.255.255.0"/>
+</network>

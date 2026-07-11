@@ -116,12 +116,21 @@ systemctl enable nginx
 log "Nginx configuré (HTTPS, en-têtes sécurité, server_tokens off)."
 
 # --- 2. PostgreSQL ---
-log "Installation PostgreSQL 14..."
+# Détection dynamique de la version (robuste quelle que soit la version Ubuntu)
+# PostgreSQL 14 sur Ubuntu 22.04, 16 sur 24.04, 18 sur 26.04...
 apt-get install -y -qq postgresql postgresql-contrib
 
-# Durcissement PostgreSQL
-PG_CONF="/etc/postgresql/14/main/postgresql.conf"
-PG_HBA="/etc/postgresql/14/main/pg_hba.conf"
+# Récupération automatique de la version installée (bonne pratique : pas de codage en dur)
+PG_VERSION=$(ls /etc/postgresql/ 2>/dev/null | head -1)
+if [[ -z "$PG_VERSION" ]]; then
+    # Fallback : interroger psql si le répertoire n'est pas standard
+    PG_VERSION=$(psql --version 2>/dev/null | awk '{print $3}' | cut -d. -f1)
+fi
+log "PostgreSQL $PG_VERSION détecté et installé."
+
+# Durcissement PostgreSQL (chemins construits dynamiquement)
+PG_CONF="/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+PG_HBA="/etc/postgresql/${PG_VERSION}/main/pg_hba.conf"
 
 # Écoute uniquement sur localhost (pas d'exposition réseau)
 sed -i "s/^#listen_addresses.*/listen_addresses = 'localhost'/" "$PG_CONF"

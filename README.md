@@ -68,7 +68,7 @@ Le **plan d'adressage complet** et la **matrice des flux autorisés** sont dans
 | **Wazuh** | SIEM / XDR, corrélation, active response | Wazuh + Elastic/Kibana | 99 |
 | **Bastion** | PAW, administration sécurisée, immuable | NixOS (config déclarative) | 99 |
 | **Windows Server** | AD, DNS, DHCP | Windows Server 2022 | 30 |
-| **Ubuntu Server** | Serveur Web + BDD | Ubuntu 22.04, Nginx, PostgreSQL | 30 |
+| **Ubuntu Server** | Serveur Web + BDD | Ubuntu 26.04, Nginx, PostgreSQL | 30 |
 | **Windows 10** | Poste employé | Windows 10 + agent Wazuh | 10 |
 | **Kali Linux** | Simule l'attaquant | Kali + scénarios d'attaque | 10 |
 

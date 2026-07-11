@@ -3,7 +3,7 @@
 # Ubuntu Server — Durcissement CIS essentiel
 # ============================================================
 # Applique un sous-ensemble des recommandations CIS Benchmark
-# Ubuntu 22.04 (niveau 1). N'est pas exhaustif mais couvre les
+# Ubuntu 26.04 (niveau 1). N'est pas exhaustif mais couvre les
 # points critiques pour le projet.
 # ============================================================
 set -euo pipefail
@@ -11,7 +11,7 @@ set -euo pipefail
 log() { echo "[$(date +%H:%M:%S)] $*"; }
 [[ "$(id -u)" -eq 0 ]] || { echo "Exécuter en root (sudo)"; exit 1; }
 
-log "=== Durcissement CIS essentiel (Ubuntu 22.04) ==="
+log "=== Durcissement CIS essentiel (Ubuntu 26.04) ==="
 
 # --- 1. Paramètres noyau (sysctl) ---
 log "Durcissement sysctl..."

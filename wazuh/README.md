@@ -11,7 +11,7 @@ automatiquement** (active response) en bloquant une IP malveillante.
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Wazuh Manager (VLAN 99)               │
-│                  10.10.99.10  (Ubuntu 22.04)            │
+│                  10.10.99.10  (Ubuntu 26.04)            │
 │                                                          │
 │  ┌──────────┐  ┌───────────┐  ┌──────────────────────┐ │
 │  │  Wazuh   │  │ Indexer   │  │  Dashboard (Kibana)  │ │
@@ -38,14 +38,14 @@ automatiquement** (active response) en bloquant une IP malveillante.
 
 ## Pré-requis
 
-- VM Ubuntu 22.04 LTS (8 Go RAM min, 4 vCPU, 50 Go disque)
+- VM Ubuntu 26.04 LTS (8 Go RAM min, 4 vCPU, 50 Go disque)
 - Sur le réseau interne VirtualBox `vbox-vlan99` (IP 10.10.99.10)
 - Accès Internet (pour télécharger les paquets) via OPNsense NAT
 
 ## Installation
 
 ```bash
-# Sur la VM Wazuh (Ubuntu 22.04, VLAN 99)
+# Sur la VM Wazuh (Ubuntu 26.04, VLAN 99)
 export WAZUH_ADMIN_PASSWORD="votre_mot_de_passe_fort"  # cf. .env
 sudo bash install/install-wazuh-manager.sh
 ```

@@ -3,11 +3,11 @@ vlan_id,zone,network,gateway,mask,host_range,dhcp,host_ip,hostname,role,os
 10,BUREAUTIQUE,10.10.10.0/24,10.10.10.1,255.255.255.0,.100-.200,yes,10.10.10.50,win10-employe,Poste utilisateur standard,Windows 10
 10,BUREAUTIQUE,10.10.10.0/24,10.10.10.1,255.255.255.0,.100-.200,yes,10.10.10.100,kali-attaquant,Simulation attaquant,Kali Linux
 20,DMZ,10.10.20.0/24,10.10.20.1,255.255.255.0,.10-.100,no,10.10.20.1,opnsense-vlan20,Gateway / pare-feu,OPNsense
-20,DMZ,10.10.20.0/24,10.10.20.1,255.255.255.0,.10-.100,no,10.10.20.10,reverse-proxy,Proxy inverse (Nginx),Ubuntu 22.04
-20,DMZ,10.10.20.0/24,10.10.20.1,255.255.255.0,.10-.100,no,10.10.20.20,vpn-gateway,Passerelle VPN d'acces distant,Ubuntu 22.04
+20,DMZ,10.10.20.0/24,10.10.20.1,255.255.255.0,.10-.100,no,10.10.20.10,reverse-proxy,Proxy inverse (Nginx),Ubuntu 26.04
+20,DMZ,10.10.20.0/24,10.10.20.1,255.255.255.0,.10-.100,no,10.10.20.20,vpn-gateway,Passerelle VPN d'acces distant,Ubuntu 26.04
 30,CRITIQUE,10.10.30.0/24,10.10.30.1,255.255.255.0,.10-.100,yes-ad,10.10.30.1,opnsense-vlan30,Gateway / pare-feu,OPNsense
-30,CRITIQUE,10.10.30.0/24,10.10.30.1,255.255.255.0,.10-.100,yes-ad,10.10.30.10,ubuntu-web-bdd,Serveur Web + base de donnees,Ubuntu 22.04
+30,CRITIQUE,10.10.30.0/24,10.10.30.1,255.255.255.0,.10-.100,yes-ad,10.10.30.10,ubuntu-web-bdd,Serveur Web + base de donnees,Ubuntu 26.04
 30,CRITIQUE,10.10.30.0/24,10.10.30.1,255.255.255.0,.10-.100,yes-ad,10.10.30.20,win-server-ad,AD / DNS / DHCP zone critique,Windows Server 2022
 99,ADMIN,10.10.99.0/24,10.10.99.1,255.255.255.0,.10-.50,no,10.10.99.1,opnsense-vlan99,Gateway / pare-feu,OPNsense
-99,ADMIN,10.10.99.0/24,10.10.99.1,255.255.255.0,.10-.50,no,10.10.99.10,wazuh-siem,SIEM / XDR + Elastic,Ubuntu 22.04
+99,ADMIN,10.10.99.0/24,10.10.99.1,255.255.255.0,.10-.50,no,10.10.99.10,wazuh-siem,SIEM / XDR + Elastic,Ubuntu 26.04
 99,ADMIN,10.10.99.0/24,10.10.99.1,255.255.255.0,.10-.50,no,10.10.99.20,bastion-nixos,PAW / bastion d'administration,NixOS
