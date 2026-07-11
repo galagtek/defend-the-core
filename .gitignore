@@ -1,0 +1,47 @@
+# Secrets & variables d'environnement
+.env
+.env.local
+*.secret
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Clés SSH privées
+*_rsa
+*_ed25519
+id_*
+
+# Sauvegardes & exports locaux
+*.bak
+*.backup
+*.tmp
+*.log
+
+# Wazuh / OSSEC
+var/
+*.db
+*.db-journal
+
+# VirtualBox
+*.vdi
+*.vmdk
+*.ova
+*.ovf
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*~
+
+# PDFs intermédiaires (les PDFs finaux dans docs/ sont versionnés)
+docs/sources/*.aux
+docs/sources/*.log
+docs/sources/*.out
+docs/sources/*.toc
