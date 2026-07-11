@@ -1,0 +1,85 @@
+{
+  "dashboard": {
+    "id": "defend-the-core-overview",
+    "title": "Defend-The-Core — Vue d'ensemble sécurité",
+    "description": "Dashboard synthétique de surveillance de toute l'infrastructure DTC",
+    "version": "1.0.0",
+    "panels": [
+      {
+        "id": "alerts-level",
+        "title": "Alertes par niveau de criticité",
+        "type": "gauge",
+        "query": "rule.level:>=3",
+        "visualization": "donut",
+        "color": {
+          "3-6": "#4CAF50",
+          "7-9": "#FF9800",
+          "10-12": "#F44336",
+          "13-15": "#9C27B0"
+        },
+        "position": { "x": 0, "y": 0, "w": 6, "h": 4 }
+      },
+      {
+        "id": "bruteforce-ssh",
+        "title": "Bruteforce SSH détectés (24h)",
+        "type": "timeseries",
+        "query": "rule.groups:bruteforce AND rule.groups:ssh",
+        "visualization": "line",
+        "position": { "x": 6, "y": 0, "w": 6, "h": 4 }
+      },
+      {
+        "id": "top-source-ips",
+        "title": "Top 10 IP sources d'alertes",
+        "type": "table",
+        "query": "rule.level:>=7",
+        "aggregation": "terms",
+        "field": "data.srcip",
+        "size": 10,
+        "position": { "x": 0, "y": 4, "w": 6, "h": 4 }
+      },
+      {
+        "id": "active-response",
+        "title": "Active Response (IP bloquées)",
+        "type": "table",
+        "query": "rule.groups:active_response",
+        "fields": ["timestamp", "data.srcip", "rule.description"],
+        "position": { "x": 6, "y": 4, "w": 6, "h": 4 }
+      },
+      {
+        "id": "firewall-blocks",
+        "title": "Blocs pare-feu OPNsense (par VLAN)",
+        "type": "barchart",
+        "query": "rule.groups:firewall AND decoder.name:opnsense-filterlog",
+        "aggregation": "terms",
+        "field": "data.dst_interface",
+        "position": { "x": 0, "y": 8, "w": 12, "h": 4 }
+      },
+      {
+        "id": "agents-status",
+        "title": "Statut des agents",
+        "type": "table",
+        "query": "agent.status:*",
+        "fields": ["agent.name", "agent.ip", "agent.status", "agent.os.name", "last_keepalive"],
+        "position": { "x": 0, "y": 12, "w": 12, "h": 4 }
+      },
+      {
+        "id": "lateral-movement",
+        "title": "Mouvements latéraux suspectés",
+        "type": "table",
+        "query": "rule.groups:lateral_movement",
+        "fields": ["timestamp", "data.srcip", "data.dstip", "rule.description", "rule.level"],
+        "position": { "x": 0, "y": 16, "w": 6, "h": 4 }
+      },
+      {
+        "id": "config-changes",
+        "title": "Modifications de configuration",
+        "type": "table",
+        "query": "rule.groups:config_change",
+        "fields": ["timestamp", "data.audit.user", "data.audit.file", "rule.description"],
+        "position": { "x": 6, "y": 16, "w": 6, "h": 4 }
+      }
+    ],
+    "time_range": "now-24h",
+    "refresh_interval": "30s"
+  }
+}

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  Wazuh — Décodeurs personnalisés (Defend-The-Core)
+  ============================================================
+  Décodeurs locaux pour parser des formats de logs spécifiques
+  au projet (OPNsense, auditd NixOS, etc.).
+
+  À déposer dans : /var/ossec/etc/decoders/local_decoder.xml
+  ============================================================
+-->
+<decoder name="defend-the-core">
+
+  <!-- ========================================================
+       1. Décodeur OPNsense (firewall logs via syslog)
+       ======================================================== -->
+  <!-- Format : <134>Aug 10 12:00:00 opnsense filterlog[123]: ... -->
+  <decoder name="opnsense-filterlog">
+    <program_name>^filterlog</program_name>
+  </decoder>
+
+  <decoder name="opnsense-filterlog-detail" parent="opnsense-filterlog">
+    <regex>^\S+\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)</regex>
+    <order>interface, action, direction, protocol, src_ip, dst_ip, src_port, dst_port</order>
+  </decoder>
+
+  <!-- ========================================================
+       2. Décodeur auditd NixOS (bastion)
+       ======================================================== -->
+  <!-- Format : type=SYSCALL msg=audit(1234567890.123:456): ... -->
+  <decoder name="auditd-syscall">
+    <prematch>^type=SYSCALL</prematch>
+    <regex offset="after_prematch">msg=audit\((\d+\.\d+):(\d+)\):.*exe="(\S+)".*key="(\S+)"</regex>
+    <order>audit.id, audit.epoch, audit.exe, audit.key</order>
+  </decoder>
+
+  <decoder name="auditd-path" parent="auditd-syscall">
+    <regex>name="(\S+)"</regex>
+    <order>audit.file</order>
+  </decoder>
+
+  <!-- ========================================================
+       3. Décodeur SSH durci (bannière personnalisée NixOS)
+       ======================================================== -->
+  <!-- Détecte les connexions au bastion avec la bannière DTC -->
+  <decoder name="dtc-ssh-banner">
+    <prematch>Defend-The-Core Bastion</prematch>
+    <regex>from (\S+)</regex>
+    <order>src_ip</order>
+  </decoder>
+
+  <!-- ========================================================
+       4. Décodeur Wazuh agent NixOS
+       ======================================================== -->
+  <!-- Les logs de l'agent NixOS ont un format spécifique -->
+  <decoder name="nixos-wazuh-agent">
+    <program_name>^wazuh-agent</program_name>
+    <regex>^\[(\d+)\] (\S+)</regex>
+    <order>agent.pid, agent.level</order>
+  </decoder>
+
+</decoder>

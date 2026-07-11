@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  Wazuh — Règles de corrélation personnalisées (Defend-The-Core)
+  ============================================================
+  Règles locales (local_rules.xml) ajoutées aux règles par défaut.
+  Plage d'IDs : 100100 - 100999 (réservée projet).
+
+  À déposer dans : /var/ossec/etc/rules/local_rules.xml
+  Puis : systemctl restart wazuh-manager
+  ============================================================
+-->
+<group name="defend_the_core,">
+
+  <!-- ========================================================
+       1. BRUTEFORCE SSH
+       ======================================================== -->
+  <!-- Détection : 5 échecs d'auth SSH en 1 minute depuis la même IP -->
+
+  <rule id="100100" level="10" frequency="5" timeframe="60">
+    <if_matched_sid>5710</if_matched_sid>  <!-- sshd: Failed password -->
+    <same_source_ip />
+    <description>SSH bruteforce détecté : 5 échecs en 60s depuis $(src_ip)</description>
+    <group>authentication_failures,bruteforce,ssh,</group>
+    <mitre>
+      <id>T1110</id>  <!-- Brute Force -->
+    </mitre>
+  </rule>
+
+  <!-- Niveau critique : 10 échecs en 2 minutes -->
+  <rule id="100101" level="12" frequency="10" timeframe="120">
+    <if_matched_sid>5710</if_matched_sid>
+    <same_source_ip />
+    <description>SSH bruteforce CRITIQUE : 10 échecs en 120s depuis $(src_ip)</description>
+    <group>authentication_failures,bruteforce,ssh,</group>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+  </rule>
+
+  <!-- ========================================================
+       2. SCAN NMAP / RECONNAISSANCE
+       ======================================================== -->
+  <!-- Détection via les logs OPNsense (syn-scan, connexions multiples) -->
+
+  <rule id="100200" level="10" frequency="15" timeframe="60">
+    <if_matched_sid>4101</if_matched_sid>  <!-- firewall drop -->
+    <same_source_ip />
+    <description>Scan réseau détecté : 15 paquets bloqués en 60s depuis $(src_ip)</description>
+    <group>recon,scan,nmap,</group>
+    <mitre>
+      <id>T1046</id>  <!-- Network Service Discovery -->
+    </mitre>
+  </rule>
+
+  <!-- Détection spécifique Nmap TCP SYN scan -->
+  <rule id="100201" level="12" frequency="30" timeframe="30">
+    <if_matched_sid>4101</if_matched_sid>
+    <same_source_ip />
+    <description>Scan Nmap SYN probable : 30 drops en 30s depuis $(src_ip)</description>
+    <group>recon,scan,nmap,</group>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+  </rule>
+
+  <!-- ========================================================
+       3. MOUVEMENT LATÉRAL
+       ======================================================== -->
+  <!-- Détection : connexion SSH depuis une IP inhabituelle (VLAN 10) -->
+
+  <rule id="100300" level="12">
+    <if_sid>5700</if_sid>  <!-- sshd: connection accepted -->
+    <src_ip>10.10.10.0/24</src_ip>  <!-- depuis le VLAN 10 -->
+    <dst_ip>10.10.30.0/24</dst_ip>  <!-- vers le VLAN 30 -->
+    <description>MOUVEMENT LATÉRAL : SSH du VLAN 10 vers VLAN 30 (interdit)</description>
+    <group>lateral_movement,authentication_success,</group>
+    <mitre>
+      <id>T1021</id>  <!-- Remote Services: SSH -->
+    </mitre>
+  </rule>
+
+  <!-- Connexion SSH depuis une IP externe (devrait être bloquée par OPNsense) -->
+  <rule id="100301" level="14">
+    <if_sid>5700</if_sid>
+    <src_ip>!10.10.0.0/16</src_ip>
+    <description>SSH accepté depuis une IP EXTERNE : $(src_ip) — investigation immédiate</description>
+    <group>lateral_movement,authentication_success,external_access,</group>
+    <mitre>
+      <id>T1021</id>
+    </mitre>
+  </rule>
+
+  <!-- ========================================================
+       4. MODIFICATION DE CONFIGURATION (auditd)
+       ======================================================== -->
+  <!-- Surveillance des changements de fichiers critiques -->
+
+  <rule id="100400" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.key">config_changes</field>
+    <description>Modification de configuration détectée : $(audit.file)</description>
+    <group>config_change,sysdig,</group>
+    <mitre>
+      <id>T1543</id>  <!-- Create or Modify System Process -->
+    </mitre>
+  </rule>
+
+  <!-- Modification de sudoers (escalade potentielle) -->
+  <rule id="100401" level="15">
+    <if_group>audit</if_group>
+    <field name="audit.key">sudo_changes</field>
+    <description>MODIFICATION SUDOERS détectée par $(audit.user) — investigation urgente</description>
+    <group>config_change,privilege_escalation,</group>
+    <mitre>
+      <id>T1548</id>  <!-- Abuse Elevation Control Mechanism -->
+    </mitre>
+  </rule>
+
+  <!-- Modification de la config NixOS (bastion) -->
+  <rule id="100402" level="10">
+    <if_group>audit</if_group>
+    <field name="audit.file">/etc/nixos/</field>
+    <description>Modification de configuration.nix par $(audit.user)</description>
+    <group>config_change,nixos,</group>
+  </rule>
+
+  <!-- ========================================================
+       5. PERSISTANCE / BACKDOOR
+       ======================================================== -->
+
+  <!-- Création d'un nouvel utilisateur (potentielle backdoor) -->
+  <rule id="100500" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.key">identity</field>
+    <description>Nouvel utilisateur ou modification /etc/passwd par $(audit.user)</description>
+    <group>persistence,add_user,</group>
+    <mitre>
+      <id>T1136</id>  <!-- Create Account -->
+    </mitre>
+  </rule>
+
+  <!-- ========================================================
+       6. ACTIVERESPONSE — déclencheurs
+       ======================================================== -->
+  <!-- Les alertes de niveau >= 10 déclenchent l'active response.
+       Le script block-attacker.sh est configuré dans ossec.conf
+       pour répondre à ces règles. -->
+
+  <!-- Règle de synthèse : toute alerte niveau >= 10 avec une src_ip -->
+  <rule id="100900" level="11">
+    <if_sid>100100,100101,100200,100201,100300,100301</if_sid>
+    <description>Alerte Defend-The-Core déclenchant active response (blocage $(src_ip))</description>
+    <group>active_response,</group>
+  </rule>
+
+</group>
