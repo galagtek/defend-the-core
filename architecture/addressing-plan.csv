@@ -12,3 +12,4 @@ vlan_id,zone,network,gateway,mask,host_range,dhcp,host_ip,hostname,role,os
 99,ADMIN,10.10.99.0/24,10.10.99.1,255.255.255.0,.10-.50,no,10.10.99.1,opnsense-vlan99,Gateway / pare-feu,OPNsense
 99,ADMIN,10.10.99.0/24,10.10.99.1,255.255.255.0,.10-.50,no,10.10.99.10,wazuh-siem,SIEM / XDR + Elastic,Ubuntu 26.04
 99,ADMIN,10.10.99.0/24,10.10.99.1,255.255.255.0,.10-.50,no,10.10.99.20,bastion-nixos,PAW / bastion d'administration,NixOS
+99,ADMIN,10.10.99.0/24,10.10.99.1,255.255.255.0,.10-.50,no,10.10.99.30,gitea-git,Serveur Git interne (IaC production),Ubuntu 26.04
